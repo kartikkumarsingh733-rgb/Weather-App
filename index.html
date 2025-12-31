@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal Weather</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="weather-card">
+        <div class="search-box">
+            <input type="text" id="cityinput" placeholder="Enter city name...">
+            <button id="search-btn">Search</button>
+        </div>
+
+        <div class="weather-info">
+            <img src="https://openweathermap.org/img/wn/10d@2x.png" alt="weather-icon" id="weather-icon">
+            <h1 id="temp">24°C</h1>
+            <h2 id="city">New Delhi</h2>
+            <p id="description">Partly Cloudy</p>
+        </div>
+
+        <div class="details-grid">
+            <div class="detail-item">
+                <span id="humid">Humidity</span>
+                <strong id="humidity">60%</strong>
+            </div>
+            <div class="detail-item">
+                <span id="Speed">Wind Speed</span>
+                <strong id="wind">12 km/h</strong>
+            </div>
+        </div>
+    </div>
+    <script>
+
+const temp = document.querySelector("#temp");
+const searchbtn = document.querySelector("#search-btn");
+const cityDisplay = document.querySelector("#city");
+const description = document.querySelector("#description");
+const humidityVal = document.querySelector("#humidity"); // Target the <strong> tag
+const windVal = document.querySelector("#wind");         // Target the <strong> tag
+const weatherIcon = document.querySelector("#weather-icon");
+
+const apiKey = "bd6ec42919254c068a25b150fb7d0b37";
+
+async function getdata(cityName) {
+    try {
+        let response = await fetch(`https://api.weatherbit.io/v2.0/current?city=${cityName}&key=${apiKey}`);
+        console.log(response.ok);
+        if (!response.ok) throw new Error("City not found") ;
+        
+        let result = await response.json();
+        return result.data[0]; 
+    } catch (error) {
+        console.error(error);
+        alert("City not found. Please try again.");
+    }
+}
+
+searchbtn.addEventListener("click", async (dets) => {
+    dets.preventDefault();
+    let inp = document.querySelector("#cityinput");
+    
+    if (inp.value.trim() === "") return;
+
+    const weatherData = await getdata(inp.value);
+
+    if (weatherData) {
+     
+        temp.textContent = `${Math.round(weatherData.temp)}°C`;
+
+
+        cityDisplay.textContent = weatherData.city_name;
+
+
+        let desc = weatherData.weather.description;
+        description.textContent = desc.charAt(0).toUpperCase() + desc.slice(1);
+
+   
+        humidityVal.textContent = `${weatherData.rh}%`;
+        windVal.textContent = `${Math.round(weatherData.wind_spd)} km/h`;
+
+        
+        const iconCode = weatherData.weather.icon;
+        weatherIcon.setAttribute("src", `https://www.weatherbit.io/static/img/icons/${iconCode}.png`);
+    }
+});
+    </script>
+</body>
+</html>
